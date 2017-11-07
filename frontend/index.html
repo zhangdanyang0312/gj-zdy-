@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <script src="node_modules/jquery/dist/jquery.js"></script>
+        <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap-theme.css" />
+        <script src="node_modules/bootstrap/dist/js/bootstrap.js"></script>
+        <link rel="stylesheet" href="node_modules/summernote/dist/summernote.css" />
+        <script src="node_modules/summernote/dist/summernote.js"></script>
+        <link href="dashboard.css" rel="stylesheet">
+        <script>
+        $(function(){
+          $('.box').summernote();
+          var id="";
+          function start(){
+              $.ajax({
+                url:"http://localhost:3000/list",
+                type:"POST",
+                success:function(e){
+                   $('tbody').html('')
+                    for(var i in e){
+                      var str
+                      $('#t').append('<tr><td>'+e[i].id+'</td><td>'+e[i].name+'</td><td><button data-id="'+e[i].id+'" class="btn btn-danger glyphicon glyphicon-trash sc"></button ><button data-toggle="modal" data-target="#exampleModal" data-id="'+e[i].id+'" class="btn btn-default glyphicon glyphicon-edit xg"></button></td></tr>')
+                    }
+                    //删除
+                    $(".sc").click(function(){
+                      console.log($(this))
+                      var id=$(this).attr("data-id");
+                      console.log(id);
+                      $.ajax({
+                        url:"http://localhost:3000/del",
+                        type:"POST",
+                        data:{b:id},
+                        success:function(e){
+                          _this.parent('td').parent('tr').remove()
+                        }
+                      })
+                    })
+                    $(".xg").click(function(){
+                        id = $(this).attr('data-id')
+                        $.ajax({
+                            url:"http://localhost:3000/list2",
+                            type:"POST",
+                            data:{
+                                d:id
+                            },
+                            success:function(e){
+                                $('#recipient-name').val(e[0].name)
+                                $('.box').summernote('code',e[0].content)
+                            }
+                        })
+                    })
+                    
+                }
+              })
+          }
+
+          
+          //修改  
+          $("#xiu").click(function(){
+            console.log(id)
+            $.ajax({
+                url:"http://localhost:3000/edit",
+                type:"POST",
+                data:{
+                    id:id,
+                    name:$(".input1").val(),
+                    content:$(".box").summernote("code") 
+                },
+                success:function(e){
+                    start()
+                    $('#recipient-name').val("")
+                  $('.box').summernote('code',"")
+                }
+            })
+          })
+
+
+
+
+
+          start()
+
+
+
+
+          //添加
+          $('.tj').click(function(){
+             $.ajax({
+                url:"http://localhost:3000/add",
+                type:"POST",
+                data:{
+                  detail:$('.box').summernote('code'),
+                  input1:$('#recipient-name').val()
+                },
+                success:function(e){
+                  start()
+                  
+                }
+              })
+          })
+   
+        })
+        </script>
+    </head>
+    <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+          <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Project name</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="#">Help</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" id="sear" placeholder="Search...">
+            <button id="ss">搜索</button>
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">Analytics</a></li>
+            <li><a href="#">Export</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item</a></li>
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+            <li><a href="">More navigation</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+          </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header">Dashboard</h1>
+
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">添加</button>
+          <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="exampleModalLabel">New message</h4>
+                </div>
+                <div class="modal-body">
+                  <form>
+                    <div class="form-group">
+                      <label for="recipient-name" class="control-label">姓名:</label>
+                      <input type="text" class="form-control input1" id="recipient-name">
+                    </div>
+                    <div class="form-group">
+                      <label for="message-text" class="control-label">内容:</label>
+                      <div class="box"></div>
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button type="button" class="tj btn btn-primary">添加</button>
+                  <button type="button" class="btn btn-primary" id="xiu">修改</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+         
+        <!--   <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">修改</button> -->
+
+
+
+          <h2 class="sub-header">Section title</h2>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>姓名</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="t">               
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    </body>
+</html>
